@@ -1,3 +1,11 @@
+//SENZOR BARIERA
+const unsigned int TRIG_PIN=9;
+const unsigned int ECHO_PIN=8;
+
+// BARIERA
+#include <Servo.h>
+Servo servo;
+
 
 // LCD
 #include <Wire.h> 
@@ -7,6 +15,10 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // TEXT LCD
 char text = "OCUPAT";
+
+// BAREIRA
+int angle = 0;
+int inAction = 0;
 
 // COD LED
 int red_light_pin= 11;
@@ -27,10 +39,18 @@ int distance; // variable for the distance measurement
 
 
 void setup() {
+  // BARIERA
+  servo.attach(13);
+  servo.write(angle);
+  
   // LCD
   lcd.init();
   lcd.backlight();
   lcd.clear();
+
+  // PIN MODE SENZOR BARIERA
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
 
   // SETUP PIN MODE LED
   pinMode(red_light_pin, OUTPUT);
@@ -58,6 +78,44 @@ void loop() {
   // Actiune parcare
   actiune_parcare(distance);
 
+  if(inAction == 0) {
+     // Calculam distanta senzor pt bariera
+    calcul_distanta_bariera(); 
+  }
+
+}
+
+void calcul_distanta_bariera() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+ const unsigned long duration= pulseIn(ECHO_PIN, HIGH);
+ int distance= duration/29/2;
+ if(duration==0){
+   Serial.println("Warning: no pulse from sensor");
+   } else {
+     Serial.println(distance);
+    if(distance < 10 && inAction == 0) {
+      inAction = 1;
+      lcd.clear();
+      lcd.print("Ai 10 secunde"); // Print the string "Hello World!"
+      lcd.setCursor(2, 1);
+      lcd.print("sa intrii!"); // Print the string "Hello World!"
+      for(angle = 10; angle < 90; angle++)  {                                  
+        servo.write(angle);               
+        delay(15);                   
+      }
+      delay(10000); 
+      // now scan back from 180 to 0 degrees
+      for(angle = 90; angle > 10; angle--){                                
+        servo.write(angle);           
+        delay(15);       
+      } 
+      inAction = 0;
+    }
+  }
 }
 
 void actiune_parcare(int distance) {
@@ -65,14 +123,18 @@ void actiune_parcare(int distance) {
     red = 255;
     blue = 0;
     green = 0;
+    if(inAction == 0) {
     lcd.clear();
     lcd.print("OCUPAT!"); // Print the string "Hello World!"
+    }
   } else {
     red = 0;
     blue = 0;
     green = 255;
+    if(inAction == 0) {
     lcd.clear();
     lcd.print("LIBER!"); // Print the string "Hello World!"
+    }
   }
 }
 

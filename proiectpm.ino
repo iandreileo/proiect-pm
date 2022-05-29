@@ -97,9 +97,9 @@ void calcul_distanta_bariera() {
     if(distance < 10 && inAction == 0) {
       inAction = 1;
       lcd.clear();
-      lcd.print("Ai 10 secunde"); // Print the string "Hello World!"
+      lcd.print("Ai 10 secunde");
       lcd.setCursor(2, 1);
-      lcd.print("sa intrii!"); // Print the string "Hello World!"
+      lcd.print("sa intrii!");
       for(angle = 10; angle < 90; angle++)  {                                  
         servo.write(angle);               
         delay(15);                   
@@ -122,7 +122,7 @@ void actiune_parcare(int distance) {
     green = 0;
     if(inAction == 0) {
     lcd.clear();
-    lcd.print("OCUPAT!"); // Print the string "Hello World!"
+    lcd.print("OCUPAT!"); 
     }
   } else {
     red = 0;
@@ -130,7 +130,7 @@ void actiune_parcare(int distance) {
     green = 255;
     if(inAction == 0) {
     lcd.clear();
-    lcd.print("LIBER!"); // Print the string "Hello World!"
+    lcd.print("LIBER!");
     }
   }
 }

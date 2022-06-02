@@ -15,7 +15,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 char text = "OCUPAT";
 
 // BAREIRA
-int angle = 0;
+int angle = 140;
 int inAction = 0;
 
 // COD LED
@@ -32,7 +32,8 @@ int green = 0;
 #define trigPin 3 
 
 long duration; 
-int distance;
+int distance = 0;
+int lastDistance = 0;
 
 
 void setup() {
@@ -70,6 +71,7 @@ void loop() {
   delay(1000);
 
   // Calculam distanta pana la obiectul de peste senzor
+  lastDistance = distance;
   distance = calculate_distance() * 0.034 / 2;
 
   // Actiune parcare
@@ -99,14 +101,14 @@ void calcul_distanta_bariera() {
       lcd.clear();
       lcd.print("Ai 10 secunde");
       lcd.setCursor(2, 1);
-      lcd.print("sa intrii!");
-      for(angle = 10; angle < 90; angle++)  {                                  
+      lcd.print("sa intri!");
+      for(angle = 140; angle < 300; angle++)  {                                  
         servo.write(angle);               
         delay(15);                   
       }
       delay(10000); 
       // now scan back from 180 to 0 degrees
-      for(angle = 90; angle > 10; angle--){                                
+      for(angle = 300; angle > 140; angle--){                                
         servo.write(angle);           
         delay(15);       
       } 
@@ -116,15 +118,36 @@ void calcul_distanta_bariera() {
 }
 
 void actiune_parcare(int distance) {
-    if (distance < 10) {
+
+    if (distance < 5) {
     red = 255;
     blue = 0;
     green = 0;
     if(inAction == 0) {
     lcd.clear();
     lcd.print("OCUPAT!"); 
+    Serial.println(distance);
+
     }
-  } else {
+  } else if (distance == 5 && inAction == 0) {
+          inAction = 1;
+      lcd.clear();
+      lcd.print("Ai 10 secunde");
+      lcd.setCursor(2, 1);
+      lcd.print("sa intri!");
+      for(angle = 140; angle < 300; angle++)  {                                  
+        servo.write(angle);               
+        delay(15);                   
+      }
+      delay(10000); 
+      // now scan back from 180 to 0 degrees
+      for(angle = 300; angle > 140; angle--){                                
+        servo.write(angle);           
+        delay(15);       
+      } 
+      inAction = 0;
+    }
+  else {
     red = 0;
     blue = 0;
     green = 255;
